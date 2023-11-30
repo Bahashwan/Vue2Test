@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Country List</title>
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <c-table
+        v-if="pageData"
+        :data="pageData.data"
+        :pagination="pagination"
+        :filters="filters"
+        @page-changed="handlePageChange"
+        @fetch-data="fetchData"
+      ></c-table>
+    </div>
+
+    <script src="./CTable.js"></script>
+    <script>
+      new Vue({
+        el: '#app',
+        data: {
+          pageData: [],
+          filters: {
+            iso_3166_1_a2: '',
+          },
+          paginate: {
+            page: 1,
+          },
+          pagination: {},
+        },
+        methods: {
+          fetchData() {
+            const url = 'https://devops100.site/test/';
+
+            fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                accept: '*/*',
+              },
+              body: JSON.stringify({
+                filters: this.filters,
+                paginate: this.paginate,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                this.pageData = data.page_data;
+                this.pagination = data.page_data.rpag;
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          },
+          handlePageChange(page) {
+            this.paginate.page = page;
+            this.fetchData();
+          },
+        },
+        mounted() {
+          this.fetchData();
+        },
+      });
+    </script>
+
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+      .pagination {
+        margin-top: 10px;
+      }
+    </style>
+  </body>
+</html>
